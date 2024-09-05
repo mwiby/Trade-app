@@ -4,7 +4,7 @@ import com.crypto.trading.config.JwtProvider;
 import com.crypto.trading.modal.AuthResponse;
 import com.crypto.trading.modal.User;
 import com.crypto.trading.repository.UserRepository;
-import com.crypto.trading.service.CustomUserDetails;
+import com.crypto.trading.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private CustomUserDetails customUserDetails;
+    private CustomUserDetailsService customUserDetailsService;
 
     @PostMapping("/signUp")
     public ResponseEntity<AuthResponse> registerUser(@RequestBody User user) throws Exception {
@@ -87,7 +87,7 @@ public class AuthController {
 
     private Authentication getAuthenticate(String userName, String password) {
 
-        UserDetails userDetails = customUserDetails.loadUserByUsername(userName);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(userName);
 
         if(userDetails == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
