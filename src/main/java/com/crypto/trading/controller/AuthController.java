@@ -2,9 +2,12 @@ package com.crypto.trading.controller;
 
 import com.crypto.trading.config.JwtProvider;
 import com.crypto.trading.modal.AuthResponse;
+import com.crypto.trading.modal.TwoFactorOTP;
 import com.crypto.trading.modal.User;
 import com.crypto.trading.repository.UserRepository;
 import com.crypto.trading.service.CustomUserDetailsService;
+import com.crypto.trading.service.TwoFactorOtpService;
+import com.crypto.trading.utils.OtpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,9 @@ public class AuthController {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private TwoFactorOtpService twoFactorOtpService;
 
     @PostMapping("/signUp")
     public ResponseEntity<AuthResponse> registerUser(@RequestBody User user) throws Exception {
@@ -74,6 +80,31 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         String jwt = JwtProvider.generateToken(auth);
+
+
+        User authUser = userRepository.findByEmail(userName);
+
+        if(user.getTwoFactorAuth().isEnabled()){
+            AuthResponse res = new AuthResponse();
+            res.setMessage("Two factor auth is enabled");
+            res.setTwoFactorAuthentication(true);
+            String otp = OtpUtils.generateOTP();
+
+            TwoFactorOTP oldTwoFactorOtp = twoFactorOtpService.findByUser(authUser.getId());
+
+            if(oldTwoFactorOtp != null){
+                twoFactorOtpService.deleteTwoFactorOtp(oldTwoFactorOtp);
+            }
+
+            TwoFactorOTP newTwoFactorOtp = twoFactorOtpService.createTwoFactorOtp(
+                    authUser,otp,jwt
+            );
+
+
+            res.setSession(newTwoFactorOtp.getId());
+            return new ResponseEntity<>(res, HttpStatus.ACCEPTED);
+
+        }
 
         AuthResponse res = new AuthResponse();
         res.setJwt(jwt);

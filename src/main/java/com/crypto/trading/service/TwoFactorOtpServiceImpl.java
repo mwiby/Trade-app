@@ -6,6 +6,7 @@ import com.crypto.trading.repository.TwoFactorOtpRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,21 +34,22 @@ public class TwoFactorOtpServiceImpl implements TwoFactorOtpService {
 
     @Override
     public TwoFactorOTP findByUser(Long userId) {
-        return twoFactorOtpRepository.findBy(userId);
+        return twoFactorOtpRepository.findByUserId(userId);
     }
 
     @Override
     public TwoFactorOTP findById(String id) {
-        return null;
+        Optional<TwoFactorOTP> opt = twoFactorOtpRepository.findById(id);
+        return opt.orElse(null);
     }
 
     @Override
     public boolean verifyTwoFactorOtp(TwoFactorOTP twoFactorOtp, String otp) {
-        return false;
+        return twoFactorOtp.getOtp().equals(otp);
     }
 
     @Override
     public void deleteTwoFactorOtp(TwoFactorOTP twoFactorOtp) {
-
+        twoFactorOtpRepository.delete(twoFactorOtp);
     }
 }
