@@ -1,4 +1,4 @@
-package com.crypto.trading.modal;
+package com.crypto.trading.response;
 
 import lombok.Data;
 

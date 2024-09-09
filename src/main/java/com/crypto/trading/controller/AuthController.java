@@ -1,7 +1,7 @@
 package com.crypto.trading.controller;
 
 import com.crypto.trading.config.JwtProvider;
-import com.crypto.trading.modal.AuthResponse;
+import com.crypto.trading.response.AuthResponse;
 import com.crypto.trading.modal.TwoFactorOTP;
 import com.crypto.trading.modal.User;
 import com.crypto.trading.repository.UserRepository;
