@@ -7,6 +7,8 @@ import com.crypto.trading.repository.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class WalletServiceImpl implements WalletService {
 
@@ -16,12 +18,22 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Wallet getUserWallet(User user) {
-        return null;
+        Wallet wallet = walletRepository.findByUserId(user.getId());
+        if(wallet == null) {
+            wallet = new Wallet();
+            wallet.setUser(user);
+        }
+        return wallet;
     }
 
     @Override
-    public Wallet addBalance(Wallet wallet, Long sumTotal) {
-        return null;
+    public Wallet addBalance(Wallet wallet, Long sum) {
+        BigDecimal balance = wallet.getBalance();
+        BigDecimal newBalance = balance.add(BigDecimal.valueOf(sum));
+
+        wallet.setBalance(newBalance);
+
+        return walletRepository.save(wallet);
     }
 
     @Override
