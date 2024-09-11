@@ -67,6 +67,7 @@ public class CoinServiceImpl implements CoinService {
 
     @Override
     public String getCoinDetails(String coinId) throws Exception {
+
         String url = "https://api.coingecko.com/api/v3/coins/"+coinId;
 
         RestTemplate restTemplate = new RestTemplate();
@@ -81,7 +82,27 @@ public class CoinServiceImpl implements CoinService {
             JsonNode JsonNode = objectMapper.readTree(response.getBody());
 
             Coin coin = new Coin();
-            // coin.setId(JsonNode.get("id").asText());
+            coin.setId(JsonNode.get("id").asText());
+            coin.setName(JsonNode.get("name").asText());
+            coin.setSymbol(JsonNode.get("symbol").asText());
+            coin.setImage(JsonNode.get("image").get("large").asText());
+
+            JsonNode marketData = JsonNode.get("market_data");
+
+            coin.setCurrentPrice(marketData.get("current_price").get("usd").asLong());
+            coin.setMarketCap(marketData.get("market_cap").get("usd").asLong());
+            coin.setMarketCapRank(marketData.get("market_cap_rank").asInt());
+            coin.setTotalVolume(marketData.get("total_volume").get("usd").asLong());
+            coin.setHigh24h(marketData.get("high_24h").get("usd").asDouble());
+            coin.setHigh24h(marketData.get("low_24h").get("usd").asDouble());
+            coin.setPriceChange24h(marketData.get("price_change_24h").get("usd").asDouble());
+            coin.setPriceChangePercentage24h(marketData.get("price_change_percentage_24h").get("usd").asDouble());
+
+            coin.setMarketCapChange24h(marketData.get("market_cap_change_24h").get("usd").asLong());
+            coin.setMarketCapChangePercentage24h(marketData.get("market_cap_change_percentage_24h").get("usd").asLong());
+            coin.setTotalSupply(marketData.get("total_supply").get("usd").asLong());
+
+            coinRepository.save(coin);
 
             return response.getBody();
         }

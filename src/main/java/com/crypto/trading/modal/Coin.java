@@ -41,13 +41,13 @@ public class Coin {
     private Long totalVolume;
 
     @JsonProperty("high_24h")
-    private Long high24h;
+    private Double high24h;
 
     @JsonProperty("low_24h")
-    private Long low24h;
+    private Double low24h;
 
     @JsonProperty("price_change_24h")
-    private Long priceChange24h;
+    private Double priceChange24h;
 
     @JsonProperty("price_change_percentage_24h")
     private double priceChangePercentage24h;
