@@ -1,5 +1,6 @@
 package com.crypto.trading.controller;
 
+import com.crypto.trading.modal.Order;
 import com.crypto.trading.modal.User;
 import com.crypto.trading.modal.Wallet;
 import com.crypto.trading.modal.WalletTransaction;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/wallet")
+@RequestMapping("/api/wallet")
 public class WalletController {
 
     @Autowired
@@ -30,7 +31,7 @@ public class WalletController {
 
     }
 
-    @PutMapping("/api/wallet/{walletId}/transfer")
+    @PutMapping("/{walletId}/transfer")
     public ResponseEntity<Wallet> walletToWalletTransfer(
             @RequestHeader("Authorization") String jwt,
             @PathVariable Long walletId,
@@ -44,5 +45,21 @@ public class WalletController {
                 receiverWallet,
                 req.getAmount());
         return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/order/{orderId}/pay")
+    public ResponseEntity<Wallet> payOrderPayment(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable Long orderId
+    ) throws Exception {
+
+        User user  = userService.findUserProfileByJwt(jwt);
+//        Wallet receiverWallet = walletService.findWalletById(walletId);
+//        Order order = orderService.get
+//        Wallet wallet = walletService.payOrderPayment(order, user);
+
+
+//        return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
+        return null;
     }
 }
