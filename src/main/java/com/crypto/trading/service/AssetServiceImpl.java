@@ -17,12 +17,19 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public Asset createAsset(User user, Coin coin, double quantity) {
-        return null;
+        Asset asset = new Asset();
+        asset.setUser(user);
+        asset.setCoin(coin);
+        asset.setQuantity(quantity);
+        asset.setBuyPrice(coin.getCurrentPrice());
+
+        return assetRepository.save(asset);
     }
 
     @Override
-    public Asset getAssetById(long assetId) {
-        return null;
+    public Asset getAssetById(long assetId) throws Exception {
+        return assetRepository.findById(assetId)
+                .orElseThrow(() -> new Exception("Asset not found"));
     }
 
     @Override
@@ -32,21 +39,25 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<Asset> getUsersAssets(Long userId) {
-        return List.of();
+        return assetRepository.findByUserId(userId);
     }
 
     @Override
-    public Asset updateAsset(Long assetId, double quantity) {
-        return null;
+    public Asset updateAsset(Long assetId, double quantity) throws Exception {
+
+        Asset newAsset = getAssetById(assetId);
+        newAsset.setQuantity(quantity + newAsset.getQuantity());
+        return assetRepository.save(newAsset);
+
     }
 
     @Override
-    public Asset findAssetByUserIdAndCoinId(Long userId, Long coinId) {
-        return null;
+    public Asset findAssetByUserIdAndCoinId(Long userId, String coinId) {
+        return assetRepository.findByUserIdAndCoinId(userId, coinId);
     }
 
     @Override
     public void deleteAsset(Long assetId) {
-
+        assetRepository.deleteById(assetId);
     }
 }
