@@ -2,10 +2,7 @@ package com.crypto.trading.service;
 
 import com.crypto.trading.domain.OrderStatus;
 import com.crypto.trading.domain.OrderType;
-import com.crypto.trading.modal.Coin;
-import com.crypto.trading.modal.Order;
-import com.crypto.trading.modal.OrderItem;
-import com.crypto.trading.modal.User;
+import com.crypto.trading.modal.*;
 import com.crypto.trading.repository.OrderItemRepository;
 import com.crypto.trading.repository.OrderRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +24,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private AssetService assetService;
 
     @Override
     public Order createOrder(User user, OrderItem orderItem, OrderType orderType) {
@@ -82,44 +82,76 @@ public class OrderServiceImpl implements OrderService {
         orderItem.setOrder(order);
 
         walletService.payOrderPayment(order, user);
+
         order.setStatus(OrderStatus.SUCCESS);
         order.setOrderType(OrderType.BUY);
+        Order savedOrder = orderRepository.save(order);
 
         // create asset
+        Asset oldAsset = assetService.findAssetByUserIdAndCoinId(
+                order.getUser().getId(),
+                order.getOrderItem().getCoin().getId());
 
-        return orderRepository.save(order);
+
+        if(oldAsset == null){
+            assetService.createAsset(user,orderItem.getCoin(),orderItem.getQuantity());
+
+        }
+        else{
+            assetService.updateAsset(oldAsset.getId(),quantity);
+        }
+
+        return savedOrder;
     }
 
     @Transactional
     public Order sellAsset(Coin coin, double quantity, User user) throws Exception {
 
-        if(quantity<= 0){
-            throw new Exception("quantity should be >0");
+        if (quantity <= 0) {
+            throw new Exception("quantity should be > 0");
         }
+
         double sellPrice = coin.getCurrentPrice();
 
-         double buyPrice = assetTosell.getPrice();
+        Asset assetToSell = assetService.findAssetByUserIdAndCoinId(
+                user.getId(),
+                coin.getId());
 
-        OrderItem orderItem = createOrderItem(coin,quantity,buyPrice,sellPrice);
-        Order order = createOrder(user, orderItem, OrderType.SELL);
-        orderItem.setOrder(order);
+        double buyPrice = assetToSell.getBuyPrice();
 
-        if(assetToSell.getQuantity() >= quantity){
+        if (assetToSell != null) {
 
-            order.setStatus(OrderStatus.SUCCESS);
-            order.setOrderType(OrderType.SELL);
-            Order savedOrder = orderRepository.save(order);
+            OrderItem orderItem = createOrderItem(
+                    coin,
+                    quantity,
+                    buyPrice,
+                    sellPrice);
 
-            walletService.payOrderPayment(order, user);
+            Order order = createOrder(user, orderItem, OrderType.SELL);
 
-            Asset updatedAsset = assetService.updateAsset(assetToSell.getId(),-quantity);
-            if(updatedAsset.getQuantity() * coin.getCurrentPrice() <= 1){
-                assetService.deleteAsset(updatedAsset.getId);
+            orderItem.setOrder(order);
+
+            if (assetToSell.getQuantity() >= quantity) {
+
+                order.setStatus(OrderStatus.SUCCESS);
+                order.setOrderType(OrderType.SELL);
+                Order savedOrder = orderRepository.save(order);
+
+                walletService.payOrderPayment(order, user);
+
+                Asset updatedAsset = assetService.updateAsset(
+                        assetToSell.getId(), -quantity
+                );
+
+                if (updatedAsset.getQuantity() * coin.getCurrentPrice() <= 1) {
+                    assetService.deleteAsset(updatedAsset.getId());
+                }
+                return savedOrder;
             }
-            return savedOrder;
+            throw new Exception("Insufficient quantity to sell");
 
         }
-        throw new Exception("Insufficient quantity to sell");
+        throw new Exception("Asset not found");
     }
 
 
