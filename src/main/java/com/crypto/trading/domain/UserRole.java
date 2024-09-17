@@ -1,6 +1,6 @@
 package com.crypto.trading.domain;
 
-public enum USER_ROLE {
+public enum UserRole {
     ROLE_ADMIN,
     ROLE_CUSTOMER
 }
