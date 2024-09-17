@@ -4,6 +4,7 @@ import com.crypto.trading.modal.Order;
 import com.crypto.trading.modal.User;
 import com.crypto.trading.modal.Wallet;
 import com.crypto.trading.modal.WalletTransaction;
+import com.crypto.trading.service.OrderService;
 import com.crypto.trading.service.UserService;
 import com.crypto.trading.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class WalletController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/user")
     private ResponseEntity<Wallet> getUserWallet(@RequestHeader("Authorization") String jwt) throws Exception {
@@ -54,12 +58,10 @@ public class WalletController {
     ) throws Exception {
 
         User user  = userService.findUserProfileByJwt(jwt);
-//        Wallet receiverWallet = walletService.findWalletById(walletId);
-//        Order order = orderService.get
-//        Wallet wallet = walletService.payOrderPayment(order, user);
+        Order order = orderService.getOrderById(orderId);
 
+        Wallet wallet = walletService.payOrderPayment(order, user);
 
-//        return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
-        return null;
+        return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
 }

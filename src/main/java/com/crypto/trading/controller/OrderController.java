@@ -48,7 +48,7 @@ public class OrderController {
 
         User user = userService.findUserProfileByJwt(jwt);
 
-        Order order = orderService.gerOrderById(orderId);
+        Order order = orderService.getOrderById(orderId);
         if(order.getUser().getId().equals(user.getId())) {
             return ResponseEntity.ok(order);
         }else {

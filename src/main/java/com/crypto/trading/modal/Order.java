@@ -33,6 +33,5 @@ public class Order {
     @OneToOne(mappedBy = "order",cascade = CascadeType.ALL)
     private OrderItem orderItem;
 
-    public Order orElseThrow(EntityNotFoundException orderNotFound) {
-    }
+
 }
